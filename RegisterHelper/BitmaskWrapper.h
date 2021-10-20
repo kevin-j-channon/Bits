@@ -51,13 +51,14 @@ struct BitMask
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template<typename Range_T, uint8_t FIRST_BIT, uint8_t LAST_BIT>
+template<typename Register_T, uint8_t FIRST_BIT, uint8_t LAST_BIT>
 struct BitRange
 {
-    using Range_t = Range_T;
+    using Register_t = Register_T;
+    using Value_t = typename Register_t::Value_t;
 
-    static_assert(FIRST_BIT < (WORD_SIZE * sizeof(Range_T)), "First bit of bit range is outside range");
-    static_assert(LAST_BIT < (WORD_SIZE * sizeof(Range_T)), "Last bit of bit range is outside range");
+    static_assert(FIRST_BIT < (WORD_SIZE * sizeof(Value_t)), "First bit of bit range is outside range");
+    static_assert(LAST_BIT < (WORD_SIZE * sizeof(Value_t)), "Last bit of bit range is outside range");
     static_assert(FIRST_BIT <= LAST_BIT, "Bit range is out of order");
 
     static constexpr uint8_t first_bit = FIRST_BIT;
@@ -66,8 +67,8 @@ struct BitRange
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template<typename Value_T, uint8_t BIT>
-struct SingleBit : public BitRange<Value_T, BIT, BIT>
+template<typename Register_T, uint8_t BIT>
+struct SingleBit : public BitRange<Register_T, BIT, BIT>
 {
 };
 
@@ -76,7 +77,7 @@ struct SingleBit : public BitRange<Value_T, BIT, BIT>
 template<typename Range_T, typename Value_T>
 Value_T GetValue(Value_T register_val)
 {
-    return (register_val & BitMask<typename Range_T::Range_t, Range_T::first_bit, Range_T::last_bit>::value) >> Range_T::first_bit;
+    return (register_val & BitMask<typename Range_T::Value_t, Range_T::first_bit, Range_T::last_bit>::value) >> Range_T::first_bit;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -84,8 +85,8 @@ Value_T GetValue(Value_T register_val)
 template<typename Range_T, typename Value_T>
 void SetValue(Value_T& register_val, Value_T val)
 {
-    register_val &= ~BitMask<typename Range_T::Range_t, Range_T::first_bit, Range_T::last_bit>::value;
-    register_val |= (val << Range_T::first_bit) & BitMask<typename Range_T::Range_t, Range_T::first_bit, Range_T::last_bit>::value;
+    register_val &= ~BitMask<typename Range_T::Value_t, Range_T::first_bit, Range_T::last_bit>::value;
+    register_val |= (val << Range_T::first_bit) & BitMask<typename Range_T::Value_t, Range_T::first_bit, Range_T::last_bit>::value;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

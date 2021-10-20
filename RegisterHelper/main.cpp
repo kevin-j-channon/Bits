@@ -12,10 +12,10 @@ using MyRange = RegisterBaseAddressRange<uint64_t, 0x00000000, 0x00001000>;
 
 using MyRegister = RegisterAddress<MyRange::Value_t, MyRange, 0x00000005>;
 
-using Status = bitmask::SingleBit<MyRegister::Value_t, 0>;
-using TestRange1 = bitmask::BitRange<MyRegister::Value_t, 1, 6>;
-using TestRange2 = bitmask::BitRange<MyRegister::Value_t, 7, 31>;
-using TestRange3 = bitmask::SingleBit<MyRegister::Value_t, 33>;
+using Status = bitmask::SingleBit<MyRegister, 0>;
+using TestRange1 = bitmask::BitRange<MyRegister, 1, 6>;
+using TestRange2 = bitmask::BitRange<MyRegister, 7, 31>;
+using TestRange3 = bitmask::SingleBit<MyRegister, 33>;
 
 ///////////////////////////////////////////////////////////////////////////////
 
