@@ -8,31 +8,34 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
-using MyRange = RegisterBaseAddressRange<uint32_t, 0x00000000, 0x00001000>;
+using MyRange = RegisterBaseAddressRange<uint64_t, 0x00000000, 0x00001000>;
 
 using MyRegister = RegisterAddress<MyRange::Value_t, MyRange, 0x00000005>;
 
-using Status = bitmask::SingleBit<0>;
-using TestRange1 = bitmask::BitRange<1, 6>;
-using TestRange2 = bitmask::BitRange<7, 31>;
+using Status = bitmask::SingleBit<MyRegister::Value_t, 0>;
+using TestRange1 = bitmask::BitRange<MyRegister::Value_t, 1, 6>;
+using TestRange2 = bitmask::BitRange<MyRegister::Value_t, 7, 31>;
+using TestRange3 = bitmask::SingleBit<MyRegister::Value_t, 33>;
 
 ///////////////////////////////////////////////////////////////////////////////
 
 int main()
 {
-    auto r1 = RegisterValue(0u);
+    auto r1 = RegisterValue<MyRegister::Value_t>(0u);
 
     r1.set<Status>(true);
     r1.set<TestRange1>(29);
     r1.set<TestRange2>(6645);
+    r1.set<TestRange3>(1);
 
-    auto x = std::bitset<32>(r1.raw());
+    auto x = std::bitset<bitmask::WORD_SIZE * sizeof(MyRegister::Value_t)>(r1.raw());
 
     std::cout << "Raw value = " <<  x << std::endl;
 
     std::cout << "Status = " << std::boolalpha << r1.get<Status>() << std::endl;
     std::cout << "Range 1 = " << r1.get<TestRange1>() << std::endl;
     std::cout << "Range 2 = " << r1.get<TestRange2>() << std::endl;
+    std::cout << "Range 3 = " << std::boolalpha << r1.get<TestRange3>() << std::endl;
 
     return 0;
 }
