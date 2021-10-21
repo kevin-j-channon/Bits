@@ -1,4 +1,4 @@
-// BitmaskWrapper.cpp : This file contains the 'main' function. Program execution begins and ends there.
+// main.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
 #include "Register.h"
@@ -13,15 +13,15 @@ using MyRange = RegisterBaseAddressRange<uint64_t, 0x00000000, 0x00001000>;
 using MyRegister = RegisterAddress<MyRange::Value_t, MyRange, 0x00000005>;
 
 using Status = bitmask::SingleBit<MyRegister, 0>;
-using TestRange1 = bitmask::BitRange<MyRegister, 1, 6>;
-using TestRange2 = bitmask::BitRange<MyRegister, 7, 31>;
+using TestRange1 = bitmask::Bitrange<MyRegister, 1, 6>;
+using TestRange2 = bitmask::Bitrange<MyRegister, 7, 31>;
 using TestRange3 = bitmask::SingleBit<MyRegister, 33>;
 
 ///////////////////////////////////////////////////////////////////////////////
 
 int main()
 {
-    auto r1 = RegisterValue<MyRegister::Value_t>(0u);
+    auto r1 = RegisterValue<MyRegister>(0u);
 
     r1.set<Status>(true);
     r1.set<TestRange1>(29);
@@ -30,7 +30,7 @@ int main()
 
     auto x = std::bitset<bitmask::WORD_SIZE * sizeof(MyRegister::Value_t)>(r1.raw());
 
-    std::cout << "Raw value = " <<  x << std::endl;
+    std::cout << "Raw value = " << x << std::endl;
 
     std::cout << "Status = " << std::boolalpha << r1.get<Status>() << std::endl;
     std::cout << "Range 1 = " << r1.get<TestRange1>() << std::endl;

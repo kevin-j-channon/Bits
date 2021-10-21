@@ -6,12 +6,18 @@
 
 namespace bitmask
 {
-
+/// <summary>
+/// The number of bits in a byte on the target system.
+/// </summary>
 const uint8_t WORD_SIZE = 8;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template< typename Value_T, int8_t SIZE>
+/// <summary>
+/// A Mask has a "value" member with type Value_T with the lowest SIZE bits set.
+/// </summary>
+/// <typeparam name="Value_T">The type of value that this mask will be applied to. It determines the maximum permissible size of the mask.</typeparam>
+template<typename Value_T, int8_t SIZE>
 struct Mask
 {
     static_assert(SIZE < WORD_SIZE * sizeof(Value_T), "Mask size exceeds register size");
@@ -21,6 +27,13 @@ struct Mask
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/// <summary>
+/// This partial template specialization is used to terminate the recursion that sets all the bits in the mask.
+/// </summary>
+/// <typeparam name="Value_T">
+/// The type of the value that this mask will be applied to. Not directly used in this struct, but is required to match the
+/// type required to terminate the recursion in Mask&lt;typename Value_T, int8_t SIZE&gt;
+/// </typeparam>
 template<typename Value_T>
 struct Mask<Value_T, 0>
 {
@@ -29,6 +42,14 @@ struct Mask<Value_T, 0>
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/// <summary>
+/// A  shift contains a "value" member that is equal to VALUE bitshifted to the left by SHIFT bits. It is intended to shift a Mask<>::value into the
+/// correct place to mask a target value from a register.
+/// </summary>
+/// <typeparam name="Value_T">
+/// The type of the value that the final, shifted mask will be aplied to. Not directly used in this class, but used to check
+/// whether the specified shift is sensible, given the type of the target values.
+/// </typeparam>
 template<typename Value_T, Value_T VALUE, int8_t SHIFT>
 struct Shift
 {
@@ -39,36 +60,29 @@ struct Shift
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template<typename Value_T, uint8_t FIRST_BIT, uint8_t LAST_BIT>
-struct BitMask
+/// <summary>
+/// A Bitmask contains a "value" member that will mask a value of type Value_T from LOWEST_BIT to HIGHEST_BIT.
+/// </summary>
+/// <typeparam name="Value_T">The type of the target values to be masked.</typeparam>
+template<typename Register_T, uint8_t LOWEST_BIT, uint8_t HIGHEST_BIT>
+struct Bitrange
 {
-    static_assert(FIRST_BIT < WORD_SIZE * sizeof(Value_T), "First bit of bitmask is outside value range");
-    static_assert(LAST_BIT < WORD_SIZE * sizeof(Value_T), "Last bit of bitmask is outside value range");
-    static_assert(FIRST_BIT <= LAST_BIT, "Bit mask is out of order");
+    using Value_t = typename Register_T::Value_t;
 
-    static constexpr Value_T value = Shift<Value_T, Mask<Value_T, 1 + LAST_BIT - FIRST_BIT>::value, FIRST_BIT>::value;
-};
+    static_assert(LOWEST_BIT < WORD_SIZE * sizeof(Value_t), "First bit of bitmask is outside value range");
+    static_assert(HIGHEST_BIT < WORD_SIZE * sizeof(Value_t), "Last bit of bitmask is outside value range");
+    static_assert(LOWEST_BIT <= HIGHEST_BIT, "Bit mask is out of order");
 
-///////////////////////////////////////////////////////////////////////////////
+    static constexpr uint8_t lowest_bit = LOWEST_BIT;
+    static constexpr uint8_t highest_bit  = HIGHEST_BIT;
 
-template<typename Register_T, uint8_t FIRST_BIT, uint8_t LAST_BIT>
-struct BitRange
-{
-    using Register_t = Register_T;
-    using Value_t = typename Register_t::Value_t;
-
-    static_assert(FIRST_BIT < (WORD_SIZE * sizeof(Value_t)), "First bit of bit range is outside range");
-    static_assert(LAST_BIT < (WORD_SIZE * sizeof(Value_t)), "Last bit of bit range is outside range");
-    static_assert(FIRST_BIT <= LAST_BIT, "Bit range is out of order");
-
-    static constexpr uint8_t first_bit = FIRST_BIT;
-    static constexpr uint8_t last_bit  = LAST_BIT;
+    static constexpr Value_t mask = Shift<Value_t, Mask<Value_t, 1 + highest_bit - lowest_bit>::value, lowest_bit>::value;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
 template<typename Register_T, uint8_t BIT>
-struct SingleBit : public BitRange<Register_T, BIT, BIT>
+struct SingleBit : public Bitrange<Register_T, BIT, BIT>
 {
 };
 
@@ -77,7 +91,7 @@ struct SingleBit : public BitRange<Register_T, BIT, BIT>
 template<typename Range_T, typename Value_T>
 Value_T GetValue(Value_T register_val)
 {
-    return (register_val & BitMask<typename Range_T::Value_t, Range_T::first_bit, Range_T::last_bit>::value) >> Range_T::first_bit;
+    return (register_val & Range_T::mask) >> Range_T::lowest_bit;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -85,8 +99,8 @@ Value_T GetValue(Value_T register_val)
 template<typename Range_T, typename Value_T>
 void SetValue(Value_T& register_val, Value_T val)
 {
-    register_val &= ~BitMask<typename Range_T::Value_t, Range_T::first_bit, Range_T::last_bit>::value;
-    register_val |= (val << Range_T::first_bit) & BitMask<typename Range_T::Value_t, Range_T::first_bit, Range_T::last_bit>::value;
+    register_val &= ~Range_T::mask;
+    register_val |= (val << Range_T::lowest_bit) & Range_T::mask;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -8,11 +8,11 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template<typename Value_T>
+template<typename Register_T>
 class RegisterValue
 {
 public:
-    typedef Value_T Value_t;
+    using Value_t = typename Register_T::Value_t;
 
     RegisterValue()
         : m_value(0)
@@ -30,13 +30,13 @@ public:
     Value_t& raw() { return m_value; }
 
     template<typename BitRange_T>
-    typename std::enable_if<BitRange_T::first_bit != BitRange_T::last_bit, Value_t>::type get() const
+    typename std::enable_if<BitRange_T::lowest_bit != BitRange_T::highest_bit, Value_t>::type get() const
     {
         return get<BitRange_T, Value_t>();
     }
 
     template<typename BitRange_T, typename Result_T>
-    typename std::enable_if<BitRange_T::first_bit != BitRange_T::last_bit, Result_T>::type get() const
+    typename std::enable_if<BitRange_T::lowest_bit != BitRange_T::highest_bit, Result_T>::type get() const
     {
         static_assert(std::is_integral<Result_T>::value, "Result of a resister::get must be an integral type");
 
@@ -45,27 +45,27 @@ public:
 
     /// Get the value of the bits defined by BitRange_T.  This version is called when the Range is exactly one bit wide.
     template<typename BitRange_T>
-    typename std::enable_if<BitRange_T::first_bit == BitRange_T::last_bit, bool>::type get() const
+    typename std::enable_if<BitRange_T::lowest_bit == BitRange_T::highest_bit, bool>::type get() const
     {
         return bitmask::GetValue<BitRange_T, Value_t>(m_value) != 0;
     }
 
     /// Set the value of the bits defined by BitRange_T.  This version is called when the Range is more than one bit wide.
     template<typename BitRange_T>
-    void set(typename std::enable_if<BitRange_T::first_bit != BitRange_T::last_bit, Value_t>::type value_to_set)
+    void set(typename std::enable_if<BitRange_T::lowest_bit != BitRange_T::highest_bit, Value_t>::type value_to_set)
     {
         bitmask::SetValue<BitRange_T, Value_t>(m_value, value_to_set);
     }
 
     /// Set the value of the bits defined by BitRange_T.  This version is called when the Range is exactly one bit wide.
     template<typename BitRange_T>
-    void set(typename std::enable_if<BitRange_T::first_bit == BitRange_T::last_bit, bool>::type bit_value)
+    void set(typename std::enable_if<BitRange_T::lowest_bit == BitRange_T::highest_bit, bool>::type bit_value)
     {
         bitmask::SetValue<BitRange_T, Value_t>(m_value, bit_value ? 1 : 0);
     }
 
 private:
-    Value_T m_value;
+    Value_t m_value;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
