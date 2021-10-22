@@ -8,6 +8,10 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/// <summary>
+/// Allows easy access to the individual bit values and ranges of bits.
+/// </summary>
+/// <typeparam name="Register_T">The type of the register to be accessed</typeparam>
 template<typename Register_T>
 class RegisterValue
 {
@@ -70,6 +74,10 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/// <summary>
+/// 
+/// </summary>
+/// <typeparam name="Value_T"></typeparam>
 template<typename Value_T, Value_T BEGIN, Value_T END>
 class RegisterBaseAddressRange
 {

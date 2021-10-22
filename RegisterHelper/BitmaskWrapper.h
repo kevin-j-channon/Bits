@@ -3,6 +3,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <cstdint>
+#include <cassert>
+#include <cmath>
 
 namespace bitmask
 {
@@ -73,14 +75,19 @@ struct Bitrange
     static_assert(HIGHEST_BIT < WORD_SIZE * sizeof(Value_t), "Last bit of bitmask is outside value range");
     static_assert(LOWEST_BIT <= HIGHEST_BIT, "Bit mask is out of order");
 
-    static constexpr uint8_t lowest_bit = LOWEST_BIT;
-    static constexpr uint8_t highest_bit  = HIGHEST_BIT;
+    static constexpr uint8_t lowest_bit  = LOWEST_BIT;
+    static constexpr uint8_t highest_bit = HIGHEST_BIT;
+    static constexpr uint8_t size        = 1 + highest_bit - lowest_bit;
 
     static constexpr Value_t mask = Shift<Value_t, Mask<Value_t, 1 + highest_bit - lowest_bit>::value, lowest_bit>::value;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/// <summary>
+/// A specialization of BitRange that is only a single bit wide.
+/// </summary>
+/// <typeparam name="Register_T">The type of the target value to be masked</typeparam>
 template<typename Register_T, uint8_t BIT>
 struct SingleBit : public Bitrange<Register_T, BIT, BIT>
 {
@@ -88,6 +95,13 @@ struct SingleBit : public Bitrange<Register_T, BIT, BIT>
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/// <summary>
+/// Extract the value in the specified bit range from the provided register value.
+/// </summary>
+/// <typeparam name="Range_T">The range type that will be used to mask register_val to get the result.</typeparam>
+/// <typeparam name="Value_T">The target value type.</typeparam>
+/// <param name="register_val">The value that contains the bits from which to extract the result.</param>
+/// <returns>The value stored in the specified bits of register_val.</returns>
 template<typename Range_T, typename Value_T>
 Value_T GetValue(Value_T register_val)
 {
@@ -96,9 +110,18 @@ Value_T GetValue(Value_T register_val)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/// <summary>
+/// Set the value into the specified bits of the provided register value.
+/// </summary>
+/// <typeparam name="Range_T">The range type that will be used to determine which bits in register_val are set.</typeparam>
+/// <typeparam name="Value_T">The target value type.</typeparam>
+/// <param name="register_val">The value that will contain the final bit values.</param>
+/// <param name="val">The value to set into the specified bits of register_val</param>
 template<typename Range_T, typename Value_T>
 void SetValue(Value_T& register_val, Value_T val)
 {
+    assert(val < std::powl(2, Range_T::size));
+
     register_val &= ~Range_T::mask;
     register_val |= (val << Range_T::lowest_bit) & Range_T::mask;
 }
