@@ -29,8 +29,12 @@ int main()
 
     r1.set<Status>(true);
     r1.set<TestRange1>(29);
-    r1.set<TestRange2>(423423); // 66458843794);
+    r1.set<TestRange2, 33554431>();
+    // Won't build because the value won't fit into the register.
+    // r1.set<TestRange2, 66458843794>();
     r1.set<TestRange3>(true);
+
+    spdlog::info("Size: {}, Max = {}", TestRange2::size, TestRange2::max());
 
     auto x = std::bitset<bitmask::WORD_SIZE * sizeof(MyRegister::Value_t)>(r1.raw());
 

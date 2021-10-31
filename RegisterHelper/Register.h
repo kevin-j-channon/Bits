@@ -72,7 +72,7 @@ public:
 
 #if (__cplusplus >= 201703L)
     template<typename BitRange_T>
-    void set(auto value_to_set) {
+    void set(typename BitRange_T::Value_t value_to_set) {
         if constexpr (BitRange_T::lowest_bit != BitRange_T::highest_bit)
         {
             bitmask::SetValue<BitRange_T, Value_t>(m_value, value_to_set);
@@ -97,6 +97,17 @@ public:
         bitmask::SetValue<BitRange_T, Value_t>(m_value, bit_value ? 1 : 0);
     }
 #endif
+
+    template<typename BitRange_T, auto VALUE>
+    void set()
+    {
+        if constexpr (!std::is_same_v<typename BitRange_T::Value_t, bool>)
+        {
+            static_assert(VALUE <= BitRange_T::max(), "specified value will not fit in allocated register bits");
+        }
+        
+        this->set<BitRange_T>(VALUE);
+    }
 
 private:
     Value_t m_value;

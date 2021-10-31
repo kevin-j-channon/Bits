@@ -13,6 +13,11 @@ namespace bitmask
 /// </summary>
 const uint8_t WORD_SIZE = 8;
 
+constexpr uint64_t static_power_2(auto N)
+{
+    return N > 0 ? 2 * static_power_2(N - 1) : 1;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /// <summary>
@@ -78,6 +83,8 @@ struct Bitrange
     static constexpr uint8_t lowest_bit  = LOWEST_BIT;
     static constexpr uint8_t highest_bit = HIGHEST_BIT;
     static constexpr uint8_t size        = 1 + highest_bit - lowest_bit;
+    
+    static constexpr auto max() { return static_power_2(size) - 1; }
 
     static constexpr Value_t mask = Shift<Value_t, Mask<Value_t, 1 + highest_bit - lowest_bit>::value, lowest_bit>::value;
 };
@@ -120,7 +127,7 @@ Value_T GetValue(Value_T register_val)
 template<typename Range_T, typename Value_T>
 void SetValue(Value_T& register_val, Value_T val)
 {
-    assert(val < std::powl(2, Range_T::size));
+    assert(val <= std::powl(2, Range_T::size));
 
     register_val &= ~Range_T::mask;
     register_val |= (val << Range_T::lowest_bit) & Range_T::mask;
