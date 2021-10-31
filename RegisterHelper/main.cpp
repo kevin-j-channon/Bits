@@ -24,7 +24,6 @@ using TestRange3 = bitmask::SingleBit<MyRegister, 33>;
 
 int main()
 {
-
     auto r1 = RegisterValue<MyRegister>(0u);
 
     r1.set<Status>(true);
