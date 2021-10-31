@@ -26,7 +26,7 @@ int main()
     r1.set<Status>(true);
     r1.set<TestRange1>(29);
     r1.set<TestRange2>(66458843794);
-    r1.set<TestRange3>(1);
+    r1.set<TestRange3>(true);
 
     auto x = std::bitset<bitmask::WORD_SIZE * sizeof(MyRegister::Value_t)>(r1.raw());
 
