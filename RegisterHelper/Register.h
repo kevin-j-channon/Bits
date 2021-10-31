@@ -34,13 +34,13 @@ public:
     Value_t& raw() { return m_value; }
 
     template<typename BitRange_T>
-    typename std::enable_if<BitRange_T::lowest_bit != BitRange_T::highest_bit, Value_t>::type get() const
+    std::enable_if_t<BitRange_T::lowest_bit != BitRange_T::highest_bit, Value_t> get() const
     {
         return get<BitRange_T, Value_t>();
     }
 
     template<typename BitRange_T, typename Result_T>
-    typename std::enable_if<BitRange_T::lowest_bit != BitRange_T::highest_bit, Result_T>::type get() const
+    std::enable_if_t<BitRange_T::lowest_bit != BitRange_T::highest_bit, Result_T> get() const
     {
         static_assert(std::is_integral<Result_T>::value, "Result of a resister::get must be an integral type");
 
@@ -49,21 +49,21 @@ public:
 
     /// Get the value of the bits defined by BitRange_T.  This version is called when the Range is exactly one bit wide.
     template<typename BitRange_T>
-    typename std::enable_if<BitRange_T::lowest_bit == BitRange_T::highest_bit, bool>::type get() const
+    std::enable_if_t<BitRange_T::lowest_bit == BitRange_T::highest_bit, bool> get() const
     {
         return bitmask::GetValue<BitRange_T, Value_t>(m_value) != 0;
     }
 
     /// Set the value of the bits defined by BitRange_T.  This version is called when the Range is more than one bit wide.
     template<typename BitRange_T>
-    void set(typename std::enable_if<BitRange_T::lowest_bit != BitRange_T::highest_bit, Value_t>::type value_to_set)
+    void set(std::enable_if_t<BitRange_T::lowest_bit != BitRange_T::highest_bit, Value_t> value_to_set)
     {
         bitmask::SetValue<BitRange_T, Value_t>(m_value, value_to_set);
     }
 
     /// Set the value of the bits defined by BitRange_T.  This version is called when the Range is exactly one bit wide.
     template<typename BitRange_T>
-    void set(typename std::enable_if<BitRange_T::lowest_bit == BitRange_T::highest_bit, bool>::type bit_value)
+    void set(std::enable_if_t<BitRange_T::lowest_bit == BitRange_T::highest_bit, bool> bit_value)
     {
         bitmask::SetValue<BitRange_T, Value_t>(m_value, bit_value ? 1 : 0);
     }
@@ -82,7 +82,7 @@ template<typename Value_T, Value_T BEGIN, Value_T END>
 class RegisterBaseAddressRange
 {
 public:
-    typedef Value_T Value_t;
+    using Value_t = Value_T;
 
     static constexpr Value_t begin = BEGIN;
     static constexpr Value_t end   = END;
@@ -98,8 +98,8 @@ template<typename Value_T, typename BaseRange_T, typename BaseRange_T::Value_t O
 class RegisterAddress
 {
 public:
-    typedef Value_T Value_t;
-    typedef typename BaseRange_T::Value_t Offset_t;
+    using Value_t = Value_T;
+    using Offset_t = typename BaseRange_T::Value_t;
 
     static constexpr Offset_t base    = BaseRange_T::begin;
     static constexpr Offset_t offset  = OFFSET;

@@ -52,7 +52,7 @@ struct Mask<Value_T, 0>
 /// The type of the value that the final, shifted mask will be aplied to. Not directly used in this class, but used to check
 /// whether the specified shift is sensible, given the type of the target values.
 /// </typeparam>
-template<typename Value_T, Value_T VALUE, int8_t SHIFT>
+template<typename Value_T, auto VALUE, int8_t SHIFT>
 struct Shift
 {
     static_assert(SHIFT < WORD_SIZE * sizeof(Value_T), "Shift exceeds value size");
