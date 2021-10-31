@@ -33,6 +33,21 @@ public:
     const Value_t& raw() const { return m_value; }
     Value_t& raw() { return m_value; }
 
+#if (__cplusplus >= 201703L)
+    template<typename BitRange_T, typename Result_T = Value_t>
+    auto get() const
+    {
+        if constexpr (BitRange_T::lowest_bit != BitRange_T::highest_bit)
+        {
+            static_assert(std::is_integral<Result_T>::value, "Result of a resister::get must be an integral type");
+
+            return static_cast<Result_T>(bitmask::GetValue<BitRange_T, Value_t>(m_value));
+        }
+        else {
+            return bitmask::GetValue<BitRange_T, Result_T>(m_value) != 0;
+        }
+    }
+#else
     template<typename BitRange_T>
     std::enable_if_t<BitRange_T::lowest_bit != BitRange_T::highest_bit, Value_t> get() const
     {
@@ -53,7 +68,21 @@ public:
     {
         return bitmask::GetValue<BitRange_T, Value_t>(m_value) != 0;
     }
+#endif
 
+#if (__cplusplus >= 201703L)
+    template<typename BitRange_T>
+    void set(auto value_to_set) {
+        if constexpr (BitRange_T::lowest_bit != BitRange_T::highest_bit)
+        {
+            bitmask::SetValue<BitRange_T, Value_t>(m_value, value_to_set);
+        }
+        else
+        {
+            bitmask::SetValue<BitRange_T, Value_t>(m_value, value_to_set ? 1 : 0);
+        }
+    }
+#else
     /// Set the value of the bits defined by BitRange_T.  This version is called when the Range is more than one bit wide.
     template<typename BitRange_T>
     void set(std::enable_if_t<BitRange_T::lowest_bit != BitRange_T::highest_bit, Value_t> value_to_set)
@@ -67,6 +96,7 @@ public:
     {
         bitmask::SetValue<BitRange_T, Value_t>(m_value, bit_value ? 1 : 0);
     }
+#endif
 
 private:
     Value_t m_value;
