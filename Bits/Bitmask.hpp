@@ -27,9 +27,9 @@ constexpr uint64_t static_power_2(auto N)
 template<typename Value_T, int8_t SIZE>
 struct Mask
 {
-    static_assert(SIZE < WORD_SIZE * sizeof(Value_T), "Mask size exceeds register size");
+    static_assert(SIZE <= WORD_SIZE * sizeof(Value_T), "Mask size exceeds register size");
 
-    static constexpr Value_T value = (1 << (SIZE - 1)) | Mask<Value_T, SIZE - 1>::value;
+    static constexpr Value_T value = (Value_T(1) << (SIZE - 1)) | Mask<Value_T, SIZE - 1>::value;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -44,7 +44,7 @@ struct Mask
 template<typename Value_T>
 struct Mask<Value_T, 0>
 {
-    static constexpr Value_T value = 0;
+    static constexpr Value_T value = Value_T(0);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
