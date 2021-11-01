@@ -20,7 +20,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BitmaskWrapper.h">
+    <ClInclude Include="Bitmask.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Register.h">

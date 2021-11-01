@@ -150,7 +150,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BitmaskWrapper.h" />
+    <ClInclude Include="Bitmask.h" />
     <ClInclude Include="Register.h" />
   </ItemGroup>
   <ItemGroup>
