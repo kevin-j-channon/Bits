@@ -54,9 +54,29 @@ public:
     };
 
     TEST_METHOD(BitRangeGetValueIsCorrect)
-    { 
+    {
+        using TestBitRange_0_2 = bitmask::Bitrange<StructWithValueType<uint32_t>, 0, 2>;
+        using TestBitRange_3_6 = bitmask::Bitrange<StructWithValueType<uint32_t>, 3, 6>;
+        using TestBitRange_30_31 = bitmask::Bitrange<StructWithValueType<uint32_t>, 30, 31>;
+
         const auto fake_register_value = std::bitset<32>("11000000111110000101100001111001").to_ulong();
 
+        Assert::AreEqual(uint32_t(0x1), bitmask::GetValue<TestBitRange_0_2, uint32_t>(fake_register_value));
+        Assert::AreEqual(uint32_t(0xF), bitmask::GetValue<TestBitRange_3_6, uint32_t>(fake_register_value));
+        Assert::AreEqual(uint32_t(0x3), bitmask::GetValue<TestBitRange_30_31, uint32_t>(fake_register_value));
+    }
+
+    TEST_METHOD(SingleBitValueIsCorrect)
+    {
+        using TestBitRange_0   = bitmask::SingleBit<StructWithValueType<uint32_t>, 0>;
+        using TestBitRange_2   = bitmask::SingleBit<StructWithValueType<uint32_t>, 2>;
+        using TestBitRange_30 = bitmask::SingleBit<StructWithValueType<uint32_t>, 30>;
+
+        const auto fake_register_value = std::bitset<32>("11000000111110000101100001111001").to_ulong();
+
+        Assert::AreEqual(true, static_cast<bool>(bitmask::GetValue<TestBitRange_0>(fake_register_value)));
+        Assert::AreEqual(false, static_cast<bool>(bitmask::GetValue<TestBitRange_2>(fake_register_value)));
+        Assert::AreEqual(true, static_cast<bool>(bitmask::GetValue<TestBitRange_30>(fake_register_value)));
     }
     
     using TestRegisterRange_32Bit = RegisterBaseAddressRange<uint32_t, 0x00000000, 0x00001000>;
