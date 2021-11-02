@@ -41,5 +41,25 @@ public:
     TEST_METHOD(MaskIsCorrect_4) { Assert::AreEqual(std::bitset<4>("1111"s).to_ulong(), bitmask::Mask<unsigned long, 4>::value); }
     TEST_METHOD(MaskIsCorrect_20) { Assert::AreEqual(std::bitset<20>("11111111111111111111"s).to_ulong(), bitmask::Mask<unsigned long, 20>::value); }
     TEST_METHOD(MaskIsCorrect_64) { Assert::AreEqual(std::bitset<64>(0xFFFFFFFFFFFFFFFF).to_ullong(), bitmask::Mask<unsigned long long, 64>::value); }
+
+    TEST_METHOD(ShiftIsCorrectForZeroShift) { Assert::AreEqual(uint32_t(0x1), bitmask::Shift<uint32_t, 0x1, 0>::value); }
+    TEST_METHOD(ShiftIsCorrectForShift_1) { Assert::AreEqual(uint32_t(0x1) << 1, bitmask::Shift<uint32_t, 0x1, 1>::value); }
+    TEST_METHOD(ShiftIsCorrectForShift_10) { Assert::AreEqual(uint32_t(0x1) << 10, bitmask::Shift<uint32_t, 0x1, 10>::value); }
+    TEST_METHOD(ShiftIsCorrectForShift64Bit_33) { Assert::AreEqual(uint64_t(0x1) << 33, bitmask::Shift<uint64_t, 0x1, 33>::value); }
+
+    template<typename Value_T>
+    struct StructWithValueType
+    {
+        using Value_t = Value_T;
+    };
+
+    TEST_METHOD(BitRangeGetValueIsCorrect)
+    { 
+        const auto fake_register_value = std::bitset<32>("11000000111110000101100001111001").to_ulong();
+
+    }
+    
+    using TestRegisterRange_32Bit = RegisterBaseAddressRange<uint32_t, 0x00000000, 0x00001000>;
+    using TestRegister_32Bit = RegisterAddress<TestRegisterRange_32Bit::Value_t, TestRegisterRange_32Bit, 0x00000005>;
 };
 } // namespace test_bits

@@ -62,7 +62,7 @@ struct Shift
 {
     static_assert(SHIFT < WORD_SIZE * sizeof(Value_T), "Shift exceeds value size");
 
-    static constexpr Value_T value = VALUE << SHIFT;
+    static constexpr Value_T value = Value_T(VALUE) << SHIFT;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
