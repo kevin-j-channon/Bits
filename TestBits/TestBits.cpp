@@ -13,8 +13,6 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace test_bits
 {
-
-
 template<typename Value_T>
 class TestRegisterFake
 {
@@ -40,7 +38,7 @@ public:
         return *std::next(bit_string.crbegin(), BIT) == '1';
     }
 
-    Value_t value() const { return bits_value<0, 8*sizeof(Value_t) - 1>(); }
+    Value_t value() const { return bits_value<0, 8 * sizeof(Value_t) - 1>(); }
 
 private:
     const std::string bit_string;
@@ -49,11 +47,11 @@ private:
 using TestRegisterFake_32 = TestRegisterFake<uint32_t>;
 using TestRegisterFake_64 = TestRegisterFake<uint64_t>;
 
-#define TEST_BIT_RANGE_GET_VALUE(size, first_bit, last_bit)            \
+#define TEST_BIT_RANGE_GET_VALUE(size, first_bit, last_bit)                      \
     Assert::AreEqual(uint##size##_t(test_reg.bits_value<first_bit, last_bit>()), \
                      bitmask::GetValue<bitmask::Bitrange<TestRegisterFake_##size, first_bit, last_bit>, uint##size##_t>(test_reg.value()))
 
-#define TEST_SINGLE_BIT_GET_VALUE(size, bit)          \
+#define TEST_SINGLE_BIT_GET_VALUE(size, bit)    \
     Assert::AreEqual(test_reg.bit_value<bit>(), \
                      static_cast<bool>(bitmask::GetValue<bitmask::Bitrange<TestRegisterFake_##size, bit, bit>>(test_reg.value())))
 
@@ -92,11 +90,10 @@ public:
     TEST_METHOD(ShiftIsCorrectForShift_10) { Assert::AreEqual(uint32_t(0x1) << 10, bitmask::Shift<uint32_t, 0x1, 10>::value); }
     TEST_METHOD(ShiftIsCorrectForShift64Bit_33) { Assert::AreEqual(uint64_t(0x1) << 33, bitmask::Shift<uint64_t, 0x1, 33>::value); }
 
-
     TEST_METHOD(BitRangeGetValueIsCorrect_32Bit)
     {
         //                                          3         2         1         0
-        //                                         10987654321098765432109876543210 
+        //                                         10987654321098765432109876543210
         const auto test_reg = TestRegisterFake_32("11000000111110000101100001111001");
 
         TEST_BIT_RANGE_GET_VALUE(32, 0, 2);
@@ -138,8 +135,8 @@ public:
         TEST_SINGLE_BIT_GET_VALUE(64, 45);
         TEST_SINGLE_BIT_GET_VALUE(64, 63);
     }
-    
+
     using TestRegisterRange_32Bit = RegisterBaseAddressRange<uint32_t, 0x00000000, 0x00001000>;
-    using TestRegister_32Bit = RegisterAddress<TestRegisterRange_32Bit::Value_t, TestRegisterRange_32Bit, 0x00000005>;
+    using TestRegister_32Bit      = RegisterAddress<TestRegisterRange_32Bit::Value_t, TestRegisterRange_32Bit, 0x00000005>;
 };
 } // namespace test_bits
