@@ -75,7 +75,7 @@ r1.set<TestRange2, 33554431>();
 r1.set<TestRange3>(true);
 */
 
-TEST_CLASS (Bitrange)
+TEST_CLASS (BitMask)
 {
 public:
     TEST_METHOD(MaskIsCorrect_1) { Assert::AreEqual(std::bitset<1>("1"s).to_ulong(), bitmask::Mask<unsigned long, 1>::value); }
@@ -84,12 +84,20 @@ public:
     TEST_METHOD(MaskIsCorrect_4) { Assert::AreEqual(std::bitset<4>("1111"s).to_ulong(), bitmask::Mask<unsigned long, 4>::value); }
     TEST_METHOD(MaskIsCorrect_20) { Assert::AreEqual(std::bitset<20>("11111111111111111111"s).to_ulong(), bitmask::Mask<unsigned long, 20>::value); }
     TEST_METHOD(MaskIsCorrect_64) { Assert::AreEqual(std::bitset<64>(0xFFFFFFFFFFFFFFFF).to_ullong(), bitmask::Mask<unsigned long long, 64>::value); }
+};
 
+TEST_CLASS (BitShift)
+{
+public:
     TEST_METHOD(ShiftIsCorrectForZeroShift) { Assert::AreEqual(uint32_t(0x1), bitmask::Shift<uint32_t, 0x1, 0>::value); }
     TEST_METHOD(ShiftIsCorrectForShift_1) { Assert::AreEqual(uint32_t(0x1) << 1, bitmask::Shift<uint32_t, 0x1, 1>::value); }
     TEST_METHOD(ShiftIsCorrectForShift_10) { Assert::AreEqual(uint32_t(0x1) << 10, bitmask::Shift<uint32_t, 0x1, 10>::value); }
     TEST_METHOD(ShiftIsCorrectForShift64Bit_33) { Assert::AreEqual(uint64_t(0x1) << 33, bitmask::Shift<uint64_t, 0x1, 33>::value); }
+};
 
+TEST_CLASS (BitRange)
+{
+public:
     TEST_METHOD(BitRangeGetValueIsCorrect_32Bit)
     {
         //                                          3         2         1         0
