@@ -225,13 +225,26 @@ public:
 
     using TestRegRange_32 = RegisterBaseAddressRange<uint32_t, 0x00000000, 0x00001000>;
     using TestRegister_32 = RegisterAddress<TestRegRange_32::Value_t, TestRegRange_32, 0x20 >;
-
-    TEST_METHOD(RawRegisterValue)
+    
+    using TestRegRange_64 = RegisterBaseAddressRange<uint64_t, 0x0000000000000000, 0x0000100000000000>;
+    using TestRegister_64 = RegisterAddress<TestRegRange_64::Value_t, TestRegRange_64, 0x50000 >;
+    
+    TEST_METHOD(RawRegisterValue_32)
     {
         std::default_random_engine rng(23432);  // Arbitrary seed.
         std::uniform_int_distribution<uint32_t> uniform_dist{};
         const auto val = uniform_dist(rng);
         const auto reg_value = RegisterValue<TestRegister_32> { val };
+
+        Assert::AreEqual(val, reg_value.raw());
+    }
+
+    TEST_METHOD(RawRegisterValue_64)
+    {
+        std::default_random_engine rng(23432); // Arbitrary seed.
+        std::uniform_int_distribution<uint64_t> uniform_dist{};
+        const auto val       = uniform_dist(rng);
+        const auto reg_value = RegisterValue<TestRegister_64>{val};
 
         Assert::AreEqual(val, reg_value.raw());
     }
