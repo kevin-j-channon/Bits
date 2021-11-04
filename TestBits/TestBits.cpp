@@ -6,6 +6,7 @@
 #include <bitset>
 #include <string>
 #include <algorithm>
+#include <random>
 
 using namespace std::string_literals;
 
@@ -54,15 +55,6 @@ using TestRegisterFake_64 = TestRegisterFake<uint64_t>;
 #define TEST_SINGLE_BIT_GET_VALUE(size, bit)    \
     Assert::AreEqual(test_reg.bit_value<bit>(), \
                      static_cast<bool>(bitmask::GetValue<bitmask::Bitrange<TestRegisterFake_##size, bit, bit>>(test_reg.value())))
-
-using MyRange = RegisterBaseAddressRange<uint64_t, 0x00000000, 0x00001000>;
-
-using MyRegister = RegisterAddress<MyRange::Value_t, MyRange, 0x00000005>;
-
-using Status     = bitmask::SingleBit<MyRegister, 0>;
-using TestRange1 = bitmask::Bitrange<MyRegister, 1, 6>;
-using TestRange2 = bitmask::Bitrange<MyRegister, 7, 31>;
-using TestRange3 = bitmask::SingleBit<MyRegister, 33>;
 
 /*
 auto r1 = RegisterValue<MyRegister>(0u);
@@ -225,8 +217,23 @@ public:
         Assert::AreEqual(uint64_t{1}, bitmask::GetValue<TestBitrange_2, uint64_t>(reg_value));
         Assert::AreEqual(uint64_t{0}, bitmask::GetValue<ZeroBits_upper, uint64_t>(reg_value));
     }
+};
 
-    using TestRegisterRange_32Bit = RegisterBaseAddressRange<uint32_t, 0x00000000, 0x00001000>;
-    using TestRegister_32Bit      = RegisterAddress<TestRegisterRange_32Bit::Value_t, TestRegisterRange_32Bit, 0x00000005>;
+TEST_CLASS(Register)
+{
+public:
+
+    using TestRegRange_32 = RegisterBaseAddressRange<uint32_t, 0x00000000, 0x00001000>;
+    using TestRegister_32 = RegisterAddress<TestRegRange_32::Value_t, TestRegRange_32, 0x20 >;
+
+    TEST_METHOD(RawRegisterValue)
+    {
+        std::default_random_engine rng(23432);  // Arbitrary seed.
+        std::uniform_int_distribution<uint32_t> uniform_dist{};
+        const auto val = uniform_dist(rng);
+        const auto reg_value = RegisterValue<TestRegister_32> { val };
+
+        Assert::AreEqual(val, reg_value.raw());
+    }
 };
 } // namespace test_bits
