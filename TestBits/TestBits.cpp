@@ -14,6 +14,11 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace test_bits
 {
+
+/// <summary>
+/// A simple, but not efficient way of getting the values of bits in an int in a more readable way in a test.
+/// </summary>
+/// <typeparam name="Value_T">The type of the fake register (i.e. uint32_t, or uint64_t)</typeparam>
 template<typename Value_T>
 class TestRegisterFake
 {
@@ -55,17 +60,6 @@ using TestRegisterFake_64 = TestRegisterFake<uint64_t>;
 #define TEST_SINGLE_BIT_GET_VALUE(size, bit)    \
     Assert::AreEqual(test_reg.bit_value<bit>(), \
                      static_cast<bool>(bitmask::GetValue<bitmask::Bitrange<TestRegisterFake_##size, bit, bit>>(test_reg.value())))
-
-/*
-auto r1 = RegisterValue<MyRegister>(0u);
-
-r1.set<Status>(true);
-r1.set<TestRange1>(29);
-r1.set<TestRange2, 33554431>();
-// Won't build because the value won't fit into the register.
-// r1.set<TestRange2, 66458843794>();
-r1.set<TestRange3>(true);
-*/
 
 TEST_CLASS (BitMask)
 {
@@ -234,19 +228,33 @@ public:
         std::default_random_engine rng(23432);  // Arbitrary seed.
         std::uniform_int_distribution<uint32_t> uniform_dist{};
         const auto val = uniform_dist(rng);
-        const auto reg_value = RegisterValue<TestRegister_32> { val };
 
+        const auto reg_value = RegisterValue<TestRegister_32> { val };
         Assert::AreEqual(val, reg_value.raw());
     }
 
     TEST_METHOD(RawRegisterValue_64)
     {
-        std::default_random_engine rng(23432); // Arbitrary seed.
+        std::default_random_engine rng(34234); // Arbitrary seed.
         std::uniform_int_distribution<uint64_t> uniform_dist{};
         const auto val       = uniform_dist(rng);
-        const auto reg_value = RegisterValue<TestRegister_64>{val};
 
+        const auto reg_value = RegisterValue<TestRegister_64>{val};
         Assert::AreEqual(val, reg_value.raw());
+    }
+
+    TEST_METHOD(GetValue_32)
+    {
+        std::default_random_engine rng(993924); // Arbitrary seed.
+        std::uniform_int_distribution<uint32_t> uniform_dist{};
+        const auto val = uniform_dist(rng);
+        const auto test_reg = TestRegisterFake_32{std::bitset<32>{val}.to_string()};
+
+        const auto reg_val = RegisterValue<TestRegister_32>{val};
+        
+        using field_1 = bitmask::Bitrange<TestRegister_32, 2, 10>;
+
+        Assert::AreEqual(test_reg.bits_value<field_1::lowest_bit, field_1::highest_bit>(), reg_val.get<field_1>());
     }
 };
 } // namespace test_bits
