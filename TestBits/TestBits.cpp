@@ -144,6 +144,41 @@ public:
         TEST_SINGLE_BIT_GET_VALUE(64, 63);
     }
 
+    TEST_METHOD(SetBitRangeValue_32)
+    {
+        // GIVEN
+        //                                          3         2         1         0
+        //                                         10987654321098765432109876543210
+        const auto test_reg = TestRegisterFake_32("11000000111110000101100001111001");
+        auto reg_value = test_reg.value();
+        const auto new_bit_values = uint32_t{0xA};
+
+        using TestBitrange = bitmask::Bitrange<TestRegisterFake_32, 7, 10>;
+
+        // WHEN
+        bitmask::SetValue<TestBitrange>(reg_value, new_bit_values);
+
+        // THEN
+        Assert::AreEqual(new_bit_values, bitmask::GetValue<TestBitrange, uint32_t>(reg_value));
+    }
+
+    TEST_METHOD(SetSingleBitValue_32)
+    {
+        // GIVEN
+        //                                          3         2         1         0
+        //                                         10987654321098765432109876543210
+        const auto test_reg       = TestRegisterFake_32("11000000111110000101100001111001");
+        auto reg_value            = test_reg.value();
+
+        using TestBitrange = bitmask::SingleBit<TestRegisterFake_32, 28>;
+
+        // WHEN
+        bitmask::SetValue<TestBitrange>(reg_value, uint32_t{1});
+
+        // THEN
+        Assert::AreEqual(uint32_t{1}, bitmask::GetValue<TestBitrange, uint32_t>(reg_value));
+    }
+
     using TestRegisterRange_32Bit = RegisterBaseAddressRange<uint32_t, 0x00000000, 0x00001000>;
     using TestRegister_32Bit      = RegisterAddress<TestRegisterRange_32Bit::Value_t, TestRegisterRange_32Bit, 0x00000005>;
 };
