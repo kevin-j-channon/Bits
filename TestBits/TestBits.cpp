@@ -278,5 +278,25 @@ public:
         Assert::AreEqual(test_reg.bits_value<field_3::lowest_bit, field_3::highest_bit>(), reg_val.get<field_3>());
         Assert::AreEqual(test_reg.bits_value<field_4::lowest_bit, field_4::highest_bit>(), reg_val.get<field_4>());
     }
+
+    TEST_METHOD(SetValue_32)
+    {
+        auto reg_val = RegisterValue<TestRegisterFake_32>{0};
+
+        using zeros_lower = bitmask::Bitrange<TestRegister_32, 0, 1>;
+        using field_1 = bitmask::Bitrange<TestRegister_32, 2, 5>;
+        using zeros_mid = bitmask::Bitrange<TestRegister_32, 6, 20>;
+        using field_2 = bitmask::SingleBit<TestRegister_32, 21>;
+        using zeros_upper = bitmask::Bitrange<TestRegister_32, 22, 31>;
+
+        reg_val.set<field_1>(15);
+        reg_val.set<field_2>(true);
+
+        Assert::AreEqual(uint32_t{0}, reg_val.get<zeros_lower>());
+        Assert::AreEqual(uint32_t{15}, reg_val.get<field_1>());
+        Assert::AreEqual(uint32_t{0}, reg_val.get<zeros_mid>());
+        Assert::AreEqual(true, reg_val.get<field_2>());
+        Assert::AreEqual(uint32_t{0}, reg_val.get<zeros_upper>());
+    }
 };
 } // namespace test_bits
