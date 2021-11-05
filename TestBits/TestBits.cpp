@@ -253,8 +253,30 @@ public:
         const auto reg_val = RegisterValue<TestRegister_32>{val};
         
         using field_1 = bitmask::Bitrange<TestRegister_32, 2, 10>;
+        using field_2 = bitmask::Bitrange<TestRegister_32, 12, 15>;
 
         Assert::AreEqual(test_reg.bits_value<field_1::lowest_bit, field_1::highest_bit>(), reg_val.get<field_1>());
+        Assert::AreEqual(test_reg.bits_value<field_2::lowest_bit, field_2::highest_bit>(), reg_val.get<field_2>());
+    }
+
+    TEST_METHOD(GetValue_64)
+    {
+        std::default_random_engine rng(111); // Arbitrary seed.
+        std::uniform_int_distribution<uint64_t> uniform_dist{};
+        const auto val      = uniform_dist(rng);
+        const auto test_reg = TestRegisterFake_64{std::bitset<64>{val}.to_string()};
+
+        const auto reg_val = RegisterValue<TestRegister_64>{val};
+
+        using field_1 = bitmask::Bitrange<TestRegister_64, 2, 10>;
+        using field_2 = bitmask::Bitrange<TestRegister_64, 12, 15>;
+        using field_3 = bitmask::Bitrange<TestRegister_64, 33, 35>;
+        using field_4 = bitmask::Bitrange<TestRegister_64, 55, 63>;
+
+        Assert::AreEqual(test_reg.bits_value<field_1::lowest_bit, field_1::highest_bit>(), reg_val.get<field_1>());
+        Assert::AreEqual(test_reg.bits_value<field_2::lowest_bit, field_2::highest_bit>(), reg_val.get<field_2>());
+        Assert::AreEqual(test_reg.bits_value<field_3::lowest_bit, field_3::highest_bit>(), reg_val.get<field_3>());
+        Assert::AreEqual(test_reg.bits_value<field_4::lowest_bit, field_4::highest_bit>(), reg_val.get<field_4>());
     }
 };
 } // namespace test_bits
