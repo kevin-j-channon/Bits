@@ -7,6 +7,7 @@
 #include <string>
 #include <algorithm>
 #include <random>
+#include <cmath>
 
 using namespace std::string_literals;
 
@@ -297,6 +298,29 @@ public:
         Assert::AreEqual(uint32_t{0}, reg_val.get<zeros_mid>());
         Assert::AreEqual(true, reg_val.get<field_2>());
         Assert::AreEqual(uint32_t{0}, reg_val.get<zeros_upper>());
+    }
+
+    TEST_METHOD(SetValue_64)
+    {
+        auto reg_val = RegisterValue<TestRegisterFake_64>{0};
+
+        using zeros_lower = bitmask::Bitrange<TestRegister_64, 0, 1>;
+        using field_1     = bitmask::Bitrange<TestRegister_64, 2, 5>;
+        using zeros_mid   = bitmask::Bitrange<TestRegister_64, 6, 20>;
+        using field_2     = bitmask::SingleBit<TestRegister_64, 21>;
+        using zeros_upper = bitmask::Bitrange<TestRegister_64, 22, 52>;
+        using field_3     = bitmask::Bitrange<TestRegisterFake_64, 53, 63>;
+
+        reg_val.set<field_1>(15);
+        reg_val.set<field_2>(true);
+        reg_val.set<field_3>(bitmask::Mask<uint64_t, 10>::value);
+
+        Assert::AreEqual(uint64_t{0}, reg_val.get<zeros_lower>());
+        Assert::AreEqual(uint64_t{15}, reg_val.get<field_1>());
+        Assert::AreEqual(uint64_t{0}, reg_val.get<zeros_mid>());
+        Assert::AreEqual(true, reg_val.get<field_2>());
+        Assert::AreEqual(uint64_t{0}, reg_val.get<zeros_upper>());
+        Assert::AreEqual(bitmask::Mask<uint64_t, 10>::value, reg_val.get<field_3>());
     }
 };
 } // namespace test_bits
