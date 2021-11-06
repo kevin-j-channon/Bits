@@ -9,12 +9,17 @@
 #include <random>
 #include <cmath>
 
+///////////////////////////////////////////////////////////////////////////////
+
 using namespace std::string_literals;
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
+///////////////////////////////////////////////////////////////////////////////
+
 namespace test_bits
 {
+///////////////////////////////////////////////////////////////////////////////
 
 /// <summary>
 /// A simple, but not efficient way of getting the values of bits in an int in a more readable way in a test.
@@ -51,8 +56,12 @@ private:
     const std::string bit_string;
 };
 
+///////////////////////////////////////////////////////////////////////////////
+
 using TestRegisterFake_32 = TestRegisterFake<uint32_t>;
 using TestRegisterFake_64 = TestRegisterFake<uint64_t>;
+
+///////////////////////////////////////////////////////////////////////////////
 
 #define TEST_BIT_RANGE_GET_VALUE(size, first_bit, last_bit)                      \
     Assert::AreEqual(uint##size##_t(test_reg.bits_value<first_bit, last_bit>()), \
@@ -61,6 +70,8 @@ using TestRegisterFake_64 = TestRegisterFake<uint64_t>;
 #define TEST_SINGLE_BIT_GET_VALUE(size, bit)    \
     Assert::AreEqual(test_reg.bit_value<bit>(), \
                      static_cast<bool>(bitmask::GetValue<bitmask::Bitrange<TestRegisterFake_##size, bit, bit>>(test_reg.value())))
+
+///////////////////////////////////////////////////////////////////////////////
 
 TEST_CLASS (BitMask)
 {
@@ -81,6 +92,8 @@ public:
     TEST_METHOD(ShiftIsCorrectForShift_10) { Assert::AreEqual(uint32_t(0x1) << 10, bitmask::Shift<uint32_t, 0x1, 10>::value); }
     TEST_METHOD(ShiftIsCorrectForShift64Bit_33) { Assert::AreEqual(uint64_t(0x1) << 33, bitmask::Shift<uint64_t, 0x1, 33>::value); }
 };
+
+///////////////////////////////////////////////////////////////////////////////
 
 TEST_CLASS (BitRange)
 {
@@ -136,8 +149,8 @@ public:
         // GIVEN
         //                                          3         2         1         0
         //                                         10987654321098765432109876543210
-        const auto test_reg = TestRegisterFake_32("11000000111110000101100001111001");
-        auto reg_value = test_reg.value();
+        const auto test_reg       = TestRegisterFake_32("11000000111110000101100001111001");
+        auto reg_value            = test_reg.value();
         const auto new_bit_values = uint32_t{0xA};
 
         using TestBitrange = bitmask::Bitrange<TestRegisterFake_32, 7, 10>;
@@ -154,8 +167,8 @@ public:
         // GIVEN
         //                                                s3         2         1         0
         //                                               10987654321098765432109876543210
-        const auto test_reg       = TestRegisterFake_32("11000000111110000101100001111001");
-        auto reg_value            = test_reg.value();
+        const auto test_reg = TestRegisterFake_32("11000000111110000101100001111001");
+        auto reg_value      = test_reg.value();
 
         using TestBitrange = bitmask::SingleBit<TestRegisterFake_32, 28>;
 
@@ -175,7 +188,7 @@ public:
         const auto new_bit_values = uint64_t{0xF};
 
         using ZeroBits_lower = bitmask::Bitrange<TestRegisterFake_64, 0, 6>;
-        using TestBitrange = bitmask::Bitrange<TestRegisterFake_64, 7, 10>;
+        using TestBitrange   = bitmask::Bitrange<TestRegisterFake_64, 7, 10>;
         using ZeroBits_upper = bitmask::Bitrange<TestRegisterFake_64, 11, 63>;
 
         // WHEN
@@ -194,10 +207,10 @@ public:
         //                                         3210987654321098765432109876543210987654321098765432109876543210
         const auto test_reg = TestRegisterFake_64("0000000000000000000000000000000000000000000000000000000000000000");
         auto reg_value      = test_reg.value();
-        
+
         using ZeroBits_lower = bitmask::Bitrange<TestRegisterFake_64, 0, 27>;
         using TestBitrange_1 = bitmask::SingleBit<TestRegisterFake_64, 28>;
-        using ZeroBits_mid = bitmask::Bitrange<TestRegisterFake_64, 29, 59>;
+        using ZeroBits_mid   = bitmask::Bitrange<TestRegisterFake_64, 29, 59>;
         using TestBitrange_2 = bitmask::SingleBit<TestRegisterFake_64, 60>;
         using ZeroBits_upper = bitmask::Bitrange<TestRegisterFake_64, 61, 63>;
 
@@ -214,23 +227,24 @@ public:
     }
 };
 
-TEST_CLASS(Register)
+///////////////////////////////////////////////////////////////////////////////
+
+TEST_CLASS (Register)
 {
 public:
-
     using TestRegRange_32 = RegisterBaseAddressRange<uint32_t, 0x00000000, 0x00001000>;
-    using TestRegister_32 = RegisterAddress<TestRegRange_32::Value_t, TestRegRange_32, 0x20 >;
-    
+    using TestRegister_32 = RegisterAddress<TestRegRange_32::Value_t, TestRegRange_32, 0x20>;
+
     using TestRegRange_64 = RegisterBaseAddressRange<uint64_t, 0x0000000000000000, 0x0000100000000000>;
-    using TestRegister_64 = RegisterAddress<TestRegRange_64::Value_t, TestRegRange_64, 0x50000 >;
-    
+    using TestRegister_64 = RegisterAddress<TestRegRange_64::Value_t, TestRegRange_64, 0x50000>;
+
     TEST_METHOD(RawRegisterValue_32)
     {
-        std::default_random_engine rng(23432);  // Arbitrary seed.
+        std::default_random_engine rng(23432); // Arbitrary seed.
         std::uniform_int_distribution<uint32_t> uniform_dist{};
         const auto val = uniform_dist(rng);
 
-        const auto reg_value = RegisterValue<TestRegister_32> { val };
+        const auto reg_value = RegisterValue<TestRegister_32>{val};
         Assert::AreEqual(val, reg_value.raw());
     }
 
@@ -238,7 +252,7 @@ public:
     {
         std::default_random_engine rng(34234); // Arbitrary seed.
         std::uniform_int_distribution<uint64_t> uniform_dist{};
-        const auto val       = uniform_dist(rng);
+        const auto val = uniform_dist(rng);
 
         const auto reg_value = RegisterValue<TestRegister_64>{val};
         Assert::AreEqual(val, reg_value.raw());
@@ -248,11 +262,11 @@ public:
     {
         std::default_random_engine rng(993924); // Arbitrary seed.
         std::uniform_int_distribution<uint32_t> uniform_dist{};
-        const auto val = uniform_dist(rng);
+        const auto val      = uniform_dist(rng);
         const auto test_reg = TestRegisterFake_32{std::bitset<32>{val}.to_string()};
 
         const auto reg_val = RegisterValue<TestRegister_32>{val};
-        
+
         using field_1 = bitmask::Bitrange<TestRegister_32, 2, 10>;
         using field_2 = bitmask::Bitrange<TestRegister_32, 12, 15>;
 
@@ -285,9 +299,9 @@ public:
         auto reg_val = RegisterValue<TestRegisterFake_32>{0};
 
         using zeros_lower = bitmask::Bitrange<TestRegister_32, 0, 1>;
-        using field_1 = bitmask::Bitrange<TestRegister_32, 2, 5>;
-        using zeros_mid = bitmask::Bitrange<TestRegister_32, 6, 20>;
-        using field_2 = bitmask::SingleBit<TestRegister_32, 21>;
+        using field_1     = bitmask::Bitrange<TestRegister_32, 2, 5>;
+        using zeros_mid   = bitmask::Bitrange<TestRegister_32, 6, 20>;
+        using field_2     = bitmask::SingleBit<TestRegister_32, 21>;
         using zeros_upper = bitmask::Bitrange<TestRegister_32, 22, 31>;
 
         reg_val.set<field_1>(15);
@@ -323,4 +337,9 @@ public:
         Assert::AreEqual(bitmask::Mask<uint64_t, 10>::value, reg_val.get<field_3>());
     }
 };
+
+///////////////////////////////////////////////////////////////////////////////
+
 } // namespace test_bits
+
+///////////////////////////////////////////////////////////////////////////////

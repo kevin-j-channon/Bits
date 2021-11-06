@@ -83,7 +83,7 @@ struct Bitrange
     static constexpr uint8_t lowest_bit  = LOWEST_BIT;
     static constexpr uint8_t highest_bit = HIGHEST_BIT;
     static constexpr uint8_t size        = 1 + highest_bit - lowest_bit;
-    
+
     static constexpr auto max() { return static_power_2(size) - 1; }
 
     static constexpr Value_t mask = Shift<Value_t, Mask<Value_t, 1 + highest_bit - lowest_bit>::value, lowest_bit>::value;

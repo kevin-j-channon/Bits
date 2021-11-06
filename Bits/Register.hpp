@@ -43,7 +43,8 @@ public:
 
             return static_cast<Result_T>(bitmask::GetValue<BitRange_T, Value_t>(m_value));
         }
-        else {
+        else
+        {
             return bitmask::GetValue<BitRange_T, Result_T>(m_value) != 0;
         }
     }
@@ -72,7 +73,8 @@ public:
 
 #if (__cplusplus >= 201703L)
     template<typename BitRange_T>
-    void set(typename BitRange_T::Value_t value_to_set) {
+    void set(typename BitRange_T::Value_t value_to_set)
+    {
         if constexpr (BitRange_T::lowest_bit != BitRange_T::highest_bit)
         {
             bitmask::SetValue<BitRange_T, Value_t>(m_value, value_to_set);
@@ -105,7 +107,7 @@ public:
         {
             static_assert(VALUE <= BitRange_T::max(), "specified value will not fit in allocated register bits");
         }
-        
+
         this->set<BitRange_T>(VALUE);
     }
 
@@ -116,9 +118,9 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 /// <summary>
-/// 
+/// A base address range is a range of register values assigned to a specified set of functionality, or area of usage.
 /// </summary>
-/// <typeparam name="Value_T"></typeparam>
+/// <typeparam name="Value_T">The type of the adresses in the register range</typeparam>
 template<typename Value_T, Value_T BEGIN, Value_T END>
 class RegisterBaseAddressRange
 {
@@ -135,11 +137,16 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/// <summary>
+/// A register address.
+/// </summary>
+/// <typeparam name="Value_T">The type of the register (e.g. uint32_t)</typeparam>
+/// <typeparam name="BaseRange_T">The base address range for the register.</typeparam>
 template<typename Value_T, typename BaseRange_T, typename BaseRange_T::Value_t OFFSET>
 class RegisterAddress
 {
 public:
-    using Value_t = Value_T;
+    using Value_t  = Value_T;
     using Offset_t = typename BaseRange_T::Value_t;
 
     static constexpr Offset_t base    = BaseRange_T::begin;
