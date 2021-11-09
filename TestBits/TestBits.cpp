@@ -229,7 +229,7 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TEST_CLASS (Register)
+TEST_CLASS (TestRegisterValue)
 {
 public:
     using TestRegRange_32 = RegisterBaseAddressRange<uint32_t, 0x00000000, 0x00001000>;
@@ -335,6 +335,27 @@ public:
         Assert::AreEqual(true, reg_val.get<field_2>());
         Assert::AreEqual(uint64_t{0}, reg_val.get<zeros_upper>());
         Assert::AreEqual(bitmask::Mask<uint64_t, 10>::value, reg_val.get<field_3>());
+    }
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+TEST_CLASS (TestRegister)
+{
+public:
+    TEST_METHOD(ConstructRegister)
+    {
+        std::function<uint32_t()> reader = []() { return uint32_t{12345678}; };
+
+        auto write_val = uint32_t{};
+        std::function<void(uint32_t)> writer = [&write_val](uint32_t v) { write_val = v; };
+
+        auto reg = Register<TestRegisterFake_32>{reader, writer};
+
+        reg.read();
+        reg.write();
+
+        Assert::AreEqual(reader(), write_val);
     }
 };
 

@@ -135,6 +135,109 @@ void SetValue(Value_T& register_val, Value_T val)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/// <summary>
+/// Allows easy access to the individual bit values and ranges of bits.
+/// </summary>
+/// <typeparam name="Register_T">The type of the register to be accessed</typeparam>
+template<typename Register_T>
+class BitRangeAccessor
+{
+public:
+    using Value_t = typename Register_T::Value_t;
+
+    explicit BitRangeAccessor(Value_t bit_values)
+        : m_bits(bit_values)
+    {
+        static_assert(std::is_integral_v<Value_t> && std::is_unsigned_v<Value_t>, "A register value must be an integral type");
+    }
+
+    const Value_t& raw() const { return m_bits; }
+    Value_t& raw() { return m_bits; }
+
+#if (__cplusplus >= 201703L)
+    template<typename BitRange_T, typename Result_T = Value_t>
+    auto get() const
+    {
+        if constexpr (BitRange_T::lowest_bit != BitRange_T::highest_bit)
+        {
+            static_assert(std::is_integral_v<Result_T>, "Result of a resister::get must be an integral type");
+
+            return static_cast<Result_T>(bitmask::GetValue<BitRange_T, Value_t>(m_bits));
+        }
+        else
+        {
+            return bitmask::GetValue<BitRange_T, Result_T>(m_bits) != 0;
+        }
+    }
+#else
+    template<typename BitRange_T>
+    std::enable_if_t<BitRange_T::lowest_bit != BitRange_T::highest_bit, Value_t> get() const
+    {
+        return get<BitRange_T, Value_t>();
+    }
+
+    template<typename BitRange_T, typename Result_T>
+    std::enable_if_t<BitRange_T::lowest_bit != BitRange_T::highest_bit, Result_T> get() const
+    {
+        static_assert(std::is_integral<Result_T>::value, "Result of a resister::get must be an integral type");
+
+        return static_cast<Result_T>(bitmask::GetValue<BitRange_T, Value_t>(m_bits));
+    }
+
+    /// Get the value of the bits defined by BitRange_T.  This version is called when the Range is exactly one bit wide.
+    template<typename BitRange_T>
+    std::enable_if_t<BitRange_T::lowest_bit == BitRange_T::highest_bit, bool> get() const
+    {
+        return bitmask::GetValue<BitRange_T, Value_t>(m_bits) != 0;
+    }
+#endif
+
+#if (__cplusplus >= 201703L)
+    template<typename BitRange_T>
+    void set(typename BitRange_T::Value_t value_to_set)
+    {
+        if constexpr (BitRange_T::lowest_bit != BitRange_T::highest_bit)
+        {
+            bitmask::SetValue<BitRange_T, Value_t>(m_bits, value_to_set);
+        }
+        else
+        {
+            bitmask::SetValue<BitRange_T, Value_t>(m_bits, value_to_set ? 1 : 0);
+        }
+    }
+#else
+    /// Set the value of the bits defined by BitRange_T.  This version is called when the Range is more than one bit wide.
+    template<typename BitRange_T>
+    void set(std::enable_if_t<BitRange_T::lowest_bit != BitRange_T::highest_bit, Value_t> value_to_set)
+    {
+        bitmask::SetValue<BitRange_T, Value_t>(m_bits, value_to_set);
+    }
+
+    /// Set the value of the bits defined by BitRange_T.  This version is called when the Range is exactly one bit wide.
+    template<typename BitRange_T>
+    void set(std::enable_if_t<BitRange_T::lowest_bit == BitRange_T::highest_bit, bool> bit_value)
+    {
+        bitmask::SetValue<BitRange_T, Value_t>(m_bits, bit_value ? 1 : 0);
+    }
+#endif
+
+    template<typename BitRange_T, auto VALUE>
+    void set()
+    {
+        if constexpr (!std::is_same_v<typename BitRange_T::Value_t, bool>)
+        {
+            static_assert(VALUE <= BitRange_T::max(), "specified value will not fit in allocated register bits");
+        }
+
+        this->set<BitRange_T>(VALUE);
+    }
+
+private:
+    Value_t m_bits;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
 } // namespace bitmask
 
 ///////////////////////////////////////////////////////////////////////////////
