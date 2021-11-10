@@ -75,6 +75,67 @@ void warp_speed_mr_sulu() {
 }
 ```
 
+### Direct register access
+
+Bits also provides a wrapper class to contain accesssor functions that read and write values to your hardware too: `Register`. So, say you have some kind of `HardwareAccess` object in your code that does the reading and writing to the actual registers, or whatever. It might look something like this:
+
+```
+const uint32_t FAN_INFO_REGISTER = 0x10050;
+const uint32_t FAN_ERROR_MASK = 0x00000001;
+const uint32_t FAN_ERROR_SHIFT = 0;
+
+class HardwareAccess
+{
+public:
+    void ReadRegister(uint32_t address, uint32_t& value);
+    void WriteRegister(uint32_t address, uint32_t value);
+};
+```
+
+You might have some existing code that looks like:
+
+```
+bool SystemControls::GetFanStatus()
+{
+    const auto reg_val = uint32_t{0};
+    m_hw_access.ReadRegister(FAN_INFO_REGISTER, reg_val);
+    
+    return 1 != ((reg_val & FAN_ERROR_MASK) >> FAN_ERROR_SHIFT)
+}
+```
+
+Bits can make this more readable if you set up some registers in the constructor of `SystemControls`, so that we can refactor the `GetFanStatus` function to:
+
+```
+bool SystemControls::GetFanStatus()
+{
+    m_fan_info.read();
+    return !m_fan_info.get<FanError>();
+}
+```
+
+which is simpler to understand and less error prone when making changes in the area.  In order to do this, we have to set up some things in the constructor of the `SystemControls` object.  Brace yourself, because this is a bit of an eye-full if you're not ready for it:
+
+```
+SystemControls::SystemControls(HardwareAccess& hw_access)
+    : m_fan_info{
+        Register<MainFanInfo>{
+            Register<MainFanInfo>::Reader{[&hw_access]() -> uint32_t {
+                    uint32_t val;
+                    hw_access.ReadRegister(MainFanInfo::address, val);
+                    return val;
+                }},
+            Register<MainFanInfo>::Writer{[&hw_access](uint32_t){
+                    hw_access.WriteRegister(MainFanInfo::address, val);
+                }}
+            }
+         }
+{
+}
+```
+
+Now, the `SystemControls` class holds a `Register` object and that object manages all the interactions with the underlying hardware, *via* the `HardwareAccess` object that's injected in through the getter and setter functions.
+
 ## Example
 
 ```
@@ -112,41 +173,51 @@ namespace right_arm
 }
 
 int  main() {
-
-    while (true) {
+    while (true)
+    {
         std::cout << "enter new arm position" << std::endl;
-    
+
         std::string arm_pos;
         std::cin >> arm_pos;
 
-        const auto (which_arm, new_pos) = ParseInput(arm_pos);
-        switch(which_arm) {
-            case LEFT_ARM: {
-                auto reg_val = RegisterValue<LeftArm>{GetLeftArm()};
-                
-                if (reg_val.get<left_arm::CurrentPosition>() != new_pos) {
-                    reg_val.set<left_arm::TargetPosition>(new_pos);
-                    
-                    while(RegisterValue<LeftArm>{GetLeftArm()}.get<left_arm::Seeking>()) {
+        const auto [which_arm, new_pos] = ParseInput(arm_pos);
+        switch (which_arm)
+        {
+            case LEFT_ARM:
+            {
+                auto arm = Register<LeftArm>{GetLeftArm, SetLeftArm};
+                if (arm.read().get<left_arm::CurrentPosition>() != new_pos)
+                {
+                    arm.set<left_arm::TargetPosition>(new_pos);
+                    arm.write();
+
+                    while (arm.read().get<left_arm::Seeking>())
+                    {
                         ::Sleep(100);
                     }
                 }
-                
+
                 break;
             }
-            case RIGHT_ARM: {
-                auto reg_val = RegisterValue<RightArm>{GetRightArm()};
-                
-                if (reg_val.get<right_arm::CurrentPosition>() != new_pos) {
-                    reg_val.set<right_arm::TargetPosition>(new_pos);
-                    
-                    while(RegisterValue<RightArm>{GetRightArm()}.get<right_arm::Seeking>()) {
+            case RIGHT_ARM:
+            {
+                auto arm = Register<RightArm>{GetRightArm, SetRightArm};
+                if (arm.read().get<right_arm::CurrentPosition>() != new_pos)
+                {
+                    arm.set<right_arm::TargetPosition>(new_pos);
+                    arm.write();
+
+                    while (arm.read().get<right_arm::Seeking>())
+                    {
                         ::Sleep(100);
                     }
                 }
-                
+
                 break;
             }
         }
+    }
+
+    return 0;
 }
 ```

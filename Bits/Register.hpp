@@ -44,16 +44,23 @@ public:
     {
     }
 
-    void write(Value_t value)
+    auto write(Value_t value) -> decltype(*this)&
     {
         this->raw() = value;
-        write();
+        return this->write();
     }
 
-    void write() const { m_writer(this->raw()); }
+    auto write() const -> decltype(*this)&
+    {
+        m_writer(this->raw());
 
-    void read() {
+        return *this;
+    }
+
+    auto read() -> decltype(*this)&
+    {
         this->raw() = m_reader();
+        return *this;
     }
 
 private:
