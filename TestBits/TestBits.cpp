@@ -254,10 +254,10 @@ TEST_CLASS (TestRegisterValue)
 {
 public:
     using TestRegRange_32 = RegisterBaseAddressRange<uint32_t, 0x00000000, 0x00001000>;
-    using TestRegister_32 = RegisterAddress<TestRegRange_32::Value_t, TestRegRange_32, 0x20>;
+    using TestRegister_32 = RegisterAddress<TestRegRange_32, 0x20>;
 
     using TestRegRange_64 = RegisterBaseAddressRange<uint64_t, 0x0000000000000000, 0x0000100000000000>;
-    using TestRegister_64 = RegisterAddress<TestRegRange_64::Value_t, TestRegRange_64, 0x50000>;
+    using TestRegister_64 = RegisterAddress<TestRegRange_64, 0x50000>;
 
     TEST_METHOD(RawRegisterValue_32)
     {

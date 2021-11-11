@@ -24,14 +24,14 @@ The `uint32_t` template type-parameter is the type of the addresses in the range
 ### Register Address
 Once you have defined an address range, then you can define specific addresses within that range.  So, the `SystemControls` might contain addresses for things like "Main Fan info", "Left Arm Servo", "Position Sensor", and things like that.  You can define a Register Address like this:
 
-`using MainFanInfo = RegisterAddress<uint32_t, SystemControls, 0x50>;`
+`using MainFanInfo = RegisterAddress<SystemControls, 0x50>;`
 
 This defines a 32-bit register in the `SystemControls` range with an offset of `0x50`. Note that the addresses of registers are expressed as *offsets* into their base range, not the absolute address.  So, in this case, the `MainFanInfo` address is actually `0x10050`, since the base range starts at `0x10000` and the offset for the address is `0x50`. The first template parameter determines how many bits are in the register. This is almost always the same as the type of the base address range that the address is part of, but it doesn't have to be.  So, you could have a 16-bit range that contained 64-bit registers, for example.
 
 If your registers are not grouped into ranges in any meaningful way, then convevience classes `Any32BitAddress` and `Any64BitAddress` are provided for 32- and 64-bit ranges, respectively.  These simply define a range that spans the entire range of values from 0 to the max value for the type. For example:
 
 ```
-using MainFanInfo = RegisterAddress<uint32_t, Any32BitAddress, 0x50>
+using MainFanInfo = RegisterAddress<Any32BitAddress, 0x50>
 ```
 
 ### Bitmasks
@@ -160,7 +160,7 @@ using SystemControls = RegisterBaseAddressRange<uint32_t, 0x10000, 0x100000>;
 
 namespace system_control_registers
 {
-using MainFan = RegisterAddress<uint32_t, SystemControls, 0x50>;
+using MainFan = RegisterAddress<SystemControls, 0x50>;
 namespace main_fan
 {
     using Error = bitmask::SingleBit<MainFan, 0>;
@@ -169,7 +169,7 @@ namespace main_fan
     using TurboActive = bitmask::SingleBit<MainFan, 31>;
 }
 
-using LeftArm = RegisterAddress<uint32_t, SystemControls, 0x51>;
+using LeftArm = RegisterAddress<SystemControls, 0x51>;
 namespace left_arm
 {
     using Error = bitmask::SingleBit<LeftArm, 0>;
@@ -178,7 +178,7 @@ namespace left_arm
     using Seeking = bitmask::SingleBit<LeftArm, 31>;
 }
 
-using RightArm = RegisterAddress<uint32_t, SystemControls, 0x56>;
+using RightArm = RegisterAddress<SystemControls, 0x56>;
 namespace right_arm
 {
     using Error = left_arm::Error;

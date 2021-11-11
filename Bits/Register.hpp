@@ -102,7 +102,7 @@ using Any64BitAddress = AnyAddress<uint64_t>;
 /// </summary>
 /// <typeparam name="Value_T">The type of the register (e.g. uint32_t)</typeparam>
 /// <typeparam name="BaseRange_T">The base address range for the register.</typeparam>
-template<typename Value_T, typename BaseRange_T, typename BaseRange_T::Value_t OFFSET>
+template<typename BaseRange_T, typename BaseRange_T::Value_t OFFSET, typename Value_T = typename BaseRange_T::Value_t>
 class RegisterAddress
 {
 public:
