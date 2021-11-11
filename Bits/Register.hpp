@@ -90,6 +90,13 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
+template< typename Value_T>
+using AnyAddress = RegisterBaseAddressRange<Value_T, 0, std::numeric_limits<Value_T>::max()>;
+using Any32BitAddress = AnyAddress<uint32_t>;
+using Any64BitAddress = AnyAddress<uint64_t>;
+
+///////////////////////////////////////////////////////////////////////////////
+
 /// <summary>
 /// A register address.
 /// </summary>

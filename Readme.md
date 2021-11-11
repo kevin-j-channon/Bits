@@ -14,14 +14,25 @@ Bits uses the C++ type system to statically check that the values that you're pa
 
 `using SystemControls = RegisterBaseAddressRange<uint32_t, 0x10000, 0x100000>;`
 
-This range can then be used to validate any register addresses that you want to specify inside the range.  The `uint32_t` parameter is the type of the addresses in the range. Typically, this might be `uint32_t`, as shown here, but maybe your system has only 16-bits of address space, or something. In this case, you'd put `uint16_t` in here and you're max accessible address would be `0xFFFF`.  The other two template parameters are the start and end addresses in the range. If you try to create an address for this address range, but outside these address values, then compilation will fail with a message telling you that you've specified an invalid address.
+This range is used to validate (at compile-time) any register addresses that you want to specify inside the range. Compile-time checks ensure that:
+
+- The range is well-formed (i.e. the end address is greater than the start address)
+- Any register declared to be in the range is actually in the range
+
+The `uint32_t` template type-parameter is the type of the addresses in the range. Typically, this might be `uint32_t`, as shown here, but maybe your system has only 16-bits of address space, or something. In this case, you'd put `uint16_t` in here and you're max accessible address would be `0xFFFF`.  The other two template parameters are the start and end addresses in the range. If you try to create an address for this address range, but outside these address values, then compilation will fail with a message telling you that you've specified an invalid address.
 
 ### Register Address
 Once you have defined an address range, then you can define specific addresses within that range.  So, the `SystemControls` might contain addresses for things like "Main Fan info", "Left Arm Servo", "Position Sensor", and things like that.  You can define a Register Address like this:
 
 `using MainFanInfo = RegisterAddress<uint32_t, SystemControls, 0x50>;`
 
-This defines a 32-bit register in the `SystemControls` range with an offset of `0x50`. The addresses of registers are actually *offets* into theier base range, no the absolute address.  So, in this case, the `MainFanInfo` address is actually `0x10050`, since the base range starts at `0x10000` and the offset for the address is `0x50`. The first template parameter determines how many bits are in the register. This is almost always the same as the type of the base address range that the address is part of, but it doesn't have to be.  So, you could have a 16-bit range that contained 64-bit registers, for example.
+This defines a 32-bit register in the `SystemControls` range with an offset of `0x50`. Note that the addresses of registers are expressed as *offsets* into their base range, not the absolute address.  So, in this case, the `MainFanInfo` address is actually `0x10050`, since the base range starts at `0x10000` and the offset for the address is `0x50`. The first template parameter determines how many bits are in the register. This is almost always the same as the type of the base address range that the address is part of, but it doesn't have to be.  So, you could have a 16-bit range that contained 64-bit registers, for example.
+
+If your registers are not grouped into ranges in any meaningful way, then convevience classes `Any32BitAddress` and `Any64BitAddress` are provided for 32- and 64-bit ranges, respectively.  These simply define a range that spans the entire range of values from 0 to the max value for the type. For example:
+
+```
+using MainFanInfo = RegisterAddress<uint32_t, Any32BitAddress, 0x50>
+```
 
 ### Bitmasks
 In many cases, a single register will contain a number of pieces of data.  In these cases, the positions of the bits in the register have different meanings. So, bit 0 might be an "error bit", or bits 1-6 would be a 5-bit position indicator, or something.  you can express these meanings with a `bitmask::Bitrange` type:
@@ -140,6 +151,10 @@ Now, the `SystemControls` class holds a `Register` object and that object manage
 
 ```
 #include <Bits/Register.hpp>
+
+#include <iostream>
+#include <string>
+#include <utility>
 
 using SystemControls = RegisterBaseAddressRange<uint32_t, 0x10000, 0x100000>;
 

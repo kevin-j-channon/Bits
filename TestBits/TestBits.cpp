@@ -229,6 +229,27 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TEST_CLASS(TestRegisterRange)
+{
+public:
+
+    TEST_METHOD(AnyAddressRangeHasFullRange_32)
+    {
+        Assert::AreEqual(uint32_t{0}, Any32BitAddress::begin);
+        Assert::AreEqual(uint32_t{0xFFFFFFFF}, Any32BitAddress::end);
+        Assert::AreEqual(uint32_t{0xFFFFFFFF}, Any32BitAddress::size);
+    }
+
+    TEST_METHOD(AnyAddressRangeHasFullRange_64)
+    {
+        Assert::AreEqual(uint64_t{0}, Any64BitAddress::begin);
+        Assert::AreEqual(uint64_t{0xFFFFFFFFFFFFFFFF}, Any64BitAddress::end);
+        Assert::AreEqual(uint64_t{0xFFFFFFFFFFFFFFFF}, Any64BitAddress::size);
+    }
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
 TEST_CLASS (TestRegisterValue)
 {
 public:
